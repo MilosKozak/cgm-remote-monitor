@@ -1,5 +1,7 @@
 'use strict';
 
+require('moment/min/locales');
+
 (function () {
   var translate = Nightscout.language.translate;
   
