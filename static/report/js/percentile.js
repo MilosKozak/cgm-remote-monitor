@@ -126,7 +126,7 @@
 				},
 				yaxis: {
 					min: 0,
-					max: browserSettings.units == 'mmol' ? 22: 400,
+					max: serverSettings.units == 'mmol' ? 22: 400,
 					tickColor: "#555",
 				},
 				grid: {

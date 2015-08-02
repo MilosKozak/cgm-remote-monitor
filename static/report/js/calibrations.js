@@ -1,4 +1,5 @@
 function report_calibrations(datastorage,daystoshow,options) {
+  var padding = { top: 15, right: 15, bottom: 30, left: 70 };
 	var treatments = [];
 	Object.keys(daystoshow).forEach(function (day) {
 		treatments = treatments.concat(datastorage[day].treatments.filter(function (t) {
@@ -95,7 +96,6 @@ function report_calibrations(datastorage,daystoshow,options) {
 	var calibration_context,xScale2,yScale2 ;
 	
 	function calibrations_drawChart() {
-		var padding = { top: 15, right: 15, bottom: 30, left: 70 };
 		var maxBG = 500;
 
 /*
@@ -266,8 +266,6 @@ function report_calibrations(datastorage,daystoshow,options) {
 	}
 	
 	function calibrations_findlatest(date,storage) {
-		var day = date.toDateInputValue();
-		
 		var last = null;
 		var time = date.getTime();
 		for (var i=0; i<storage.length; i++) {

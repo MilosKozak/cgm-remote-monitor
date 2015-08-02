@@ -46,8 +46,7 @@
 				</dl>
 				<dl class="radio">
 					<b>Ratios profile input: </b>
-					<input type="radio" name="pe_input" id="pe_input_simple" checked /><label for="pe_input_simple" title="Single value for whole day">Simple</label>&nbsp;
-					<input type="radio" name="pe_input" id="pe_input_calculator" checked /><label for="pe_input_calculator" title="Values varying by time and glycemic index">Bolus calculator style</label>
+					<input type="checkbox" id="pe_perGIvalues" checked /><label for="pe_input_simple" title="Single value for whole day">Simple</label>&nbsp;
 				</dl>
 				<dl>
 					<b title="Start of profile validity">Profile valid from: </b>
@@ -72,15 +71,21 @@
 				</dl>
 			</fieldset>
 
- 			<fieldset id="pe_calculator" class="browserSettings">
+      <fieldset>
+					<legend title="g carbs per U insulin. The ratio of how many grams of carbohydrates are offset by each U of insulin.">Insulin to carb ratio (IC) [g]:</legend>
+					<div id="pe_ic_placeholder"></div>
+      </fieldset>
+      
+      <fieldset>
+					<legend title="mg/dL or mmol/L per U insulin. The ratio of how much BG changes with each U of corrective insulin.">Insulin Sensitivity Factor (ISF) [mg/dL,mmol/L]: </legend>
+					<div id="pe_isf_placeholder"></div>
+      </fieldset>
+
+      <fieldset id="pe_calculator" class="browserSettings">
 				<legend>Bolus calculator style settings</legend>
 				<dl>
-					<b title="g carbs per U insulin. The ratio of how many grams of carbohydrates are offset by each U of insulin.">Insulin to carb ratio (IC) [g]:</b><br>
-					<div id="pe_ic_placeholder"></div>
 				</dl>
 				<dl>
-					<b title="mg/dL or mmol/L per U insulin. The ratio of how much BG changes with each U of corrective insulin.">Insulin Sensitivity Factor (ISF) [mg/dL,mmol/L]: </b><br>
-					<div id="pe_isf_placeholder"></div>
 				</dl>
 				<dl>
 					<b title="grams per unit time. Represents both the change in COB per unit of time, as well as the amount of carbs that should take effect over that time.  Carb absorption / activity curves are less well understood than insulin activity, but can be approximated using an initial delay followed by a constant rate of absorption (g/hr).">Carbs activity / absorption rate: [g/hour]</b><br>
@@ -113,17 +118,13 @@
 
 		</form>
 
+        <script src="/public/js/bundle.js"></script>
         <script src="/bower_components/jquery/dist/jquery.min.js"></script>
         <script src="/bower_components/jquery-ui/jquery-ui.min.js"></script>
         <script src="/bower_components/jsSHA/src/sha1.js"></script>
-        <script src="https://cdnjs.cloudflare.com/ajax/libs/jquery-ui-timepicker-addon/1.4.5/jquery-ui-timepicker-addon.min.js"></script>
-        <script src="https://cdnjs.cloudflare.com/ajax/libs/jquery-ui-timepicker-addon/1.4.5/jquery-ui-sliderAccess.js"></script>
-        <script src="/socket.io/socket.io.js"></script>
-        <script src="/api/v1/status.js"></script>
-        <script src="/js/ui-utils.js"></script>
-        <script src="/public/js/bundle.js"></script>
-        <script src="/js/language.js"></script>
-        <script src="/js/hashauth/hashauth.js"></script>
-        <script src="/js/profileeditor.js"></script>
+        <script src="/bower_components/jqueryui-timepicker-addon/dist/jquery-ui-timepicker-addon.min.js"></script>
+        <script src="/bower_components/jqueryui-timepicker-addon/dist/jquery-ui-sliderAccess.js"></script>
+        <script src="/hashauth/js/hashauth.js"></script>
+        <script src="/profile/js/profile.js"></script>
 	</body>
 </html>
