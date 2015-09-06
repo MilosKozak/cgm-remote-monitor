@@ -128,8 +128,6 @@
     options.scale = $('#rp_linear').is(':checked') ? SCALE_LINEAR : SCALE_LOG;
     options.width = parseInt($('#rp_size :selected').attr('x'));
     options.height = parseInt($('#rp_size :selected').attr('y'));
-    options.maxInsulinValue = maxInsulinValue;
-    options.maxCarbsValue = maxCarbsValue;
     
     var matchesneeded = 0;
 
@@ -161,7 +159,7 @@
           $.ajax('/api/v1/treatments.json'+tquery, {
             success: function (xhr) {
               treatmentData = xhr.map(function (treatment) {
-                return moment(treatment.created_at).format('YYYY-MM-DD');
+                return moment(treatment.mills).format('YYYY-MM-DD');
               });
               // unique it
               treatmentData = $.grep(treatmentData, function(v, k){
@@ -194,7 +192,7 @@
           $.ajax('/api/v1/treatments.json'+tquery, {
             success: function (xhr) {
               treatmentData = xhr.map(function (treatment) {
-                return moment(treatment.created_at).format('YYYY-MM-DD');
+                return moment(treatment.mills).format('YYYY-MM-DD');
               });
               // unique it
               treatmentData = $.grep(treatmentData, function(v, k){
@@ -227,7 +225,7 @@
           $.ajax('/api/v1/treatments.json'+tquery, {
             success: function (xhr) {
               treatmentData = xhr.map(function (treatment) {
-                return moment(treatment.created_at).format('YYYY-MM-DD');
+                return moment(treatment.mills).format('YYYY-MM-DD');
               });
               // unique it
               treatmentData = $.grep(treatmentData, function(v, k){
@@ -417,11 +415,11 @@
         success: function (xhr) {
           treatmentData = xhr.map(function (treatment) {
             var timestamp = new Date(treatment.timestamp || treatment.created_at);
-            treatment.x = timestamp.getTime();
+            treatment.mills = timestamp.getTime();
             return treatment;
           });
           data.treatments = treatmentData.slice();
-          data.treatments.sort(function(a, b) { return a.x - b.x; });
+          data.treatments.sort(function(a, b) { return a.mills - b.mills; });
         }
       }).done(function () {
         $('#'+containerprefix+day).html('<b>'+translate('Processing data of')+' '+day+' ...</b>');
@@ -434,7 +432,6 @@
   function processData(data,day,options) {
     // treatments
     data.treatments.forEach(function (d) {
-      d.created_at = new Date(d.created_at);
       if (parseFloat(d.insulin) > maxInsulinValue) maxInsulinValue = parseFloat(d.insulin);
       if (parseFloat(d.carbs) > maxCarbsValue) maxCarbsValue = parseFloat(d.carbs);
     });
@@ -485,6 +482,8 @@
 
     
     datastorage[day] = data;
+    options.maxInsulinValue = maxInsulinValue;
+    options.maxCarbsValue = maxCarbsValue;
     showreports(options);
   }
 
@@ -597,7 +596,7 @@
         }
       }
 
-      return treatmentGlucose || scaleBg(calcBGByTime(treatment.created_at.getTime()));
+      return treatmentGlucose || scaleBg(calcBGByTime(treatment.mills));
     }
 
   function scaleBg(bg) {

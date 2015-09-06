@@ -12,35 +12,30 @@ TODO:
   
   var defaultprofile = {
       //General values
-      "perGIvalues": true,
       "dia":3,
       
       // Simple style values, "from" are in minutes from midnight
-//      "ic": [{"from":0,"val":0},
-//          {"from":48*30,"val":0}
-//          ],
       "carbratio": [
         {
           "time": "00:00",
           "value": 30
         }],
       "carbs_hr":30,
-//      "isf": [{"from":0,"val":0},
-//          {"from":48*30,"val":0}
-//          ],
+      "delay": 20,
       "sens": [
         {
           "time": "00:00",
           "value": 17
         }],
       "startDate": new Date(),
-      "timezone": "Europe/Berlin",
+      "timezone": "UTC",
       
       //perGIvalues style values
-      "car_high": 30,
-      "car_medium": 30,
-      "car_low": 30,
-      "delay_high": 20,
+      "perGIvalues": false,
+      "carbs_hr_high": 30,
+      "carbs_hr_medium": 30,
+      "carbs_hr_low": 30,
+      "delay_high": 15,
       "delay_medium": 20,
       "delay_low": 20,
 
@@ -52,38 +47,32 @@ TODO:
       "target_low":[
         {
           "time": "00:00",
-          "value": 5
+          "value": 0
         }],
       "target_high":[
         {
           "time": "00:00",
-          "value": 6
+          "value": 0
         }]
-//      "targetBG": [
-//          {"from":0,"low":0,"high":0},
-//         {"from":48*30,"low":0,"high":0}
-//          ]
   };
 
   var GuiToVal = [
-      // General
-      { "html":"pe_perGIvalues",    "type":"checkbox" , "settings":"c_profile.perGIvalues" },
-      { "html":"pe_dia",         "type":"float" ,   "settings":"c_profile.dia" },
-      
-      { "html":"pe_validfrom",     "type":"date" ,   "settings":"c_profile.startDate" },
-      
-      // Simple style values
-      { "html":"pe_if",       "type":"int" ,       "settings":"c_profile.carbratio" },
-      { "html":"pe_hr",       "type":"int" ,       "settings":"c_profile.carbs_hr" },
-      { "html":"pe_isf",       "type":"int" ,       "settings":"c_profile.sens" },
-      
-      //Bolus calculator style values
-      { "html":"pe_hr_high",     "type":"int" ,       "settings":"c_profile.car_high" },
-      { "html":"pe_hr_medium",  "type":"int" ,       "settings":"c_profile.car_medium" },
-      { "html":"pe_hr_low",     "type":"int" ,       "settings":"c_profile.car_low" },
-      { "html":"pe_delay_high",   "type":"int" ,       "settings":"c_profile.delay_high" },
-      { "html":"pe_delay_medium",  "type":"int" ,       "settings":"c_profile.delay_medium" },
-      { "html":"pe_delay_low",   "type":"int" ,       "settings":"c_profile.delay_low" }
+    // General
+    { "html":"pe_dia",          "type":"float" ,      "settings":"c_profile.dia" },
+    { "html":"pe_validfrom",    "type":"date" ,       "settings":"c_profile.startDate" },
+    // Simple style values
+    { "html":"pe_hr",           "type":"int" ,        "settings":"c_profile.carbs_hr" },
+    { "html":"pe_delay",        "type":"int" ,        "settings":"c_profile.delay" },
+    //Advanced style values
+    { "html":"pe_perGIvalues",  "type":"checkbox" ,   "settings":"c_profile.perGIvalues" },
+    { "html":"pe_hr_high",      "type":"int" ,        "settings":"c_profile.carbs_hr_high" },
+    { "html":"pe_hr_medium",    "type":"int" ,        "settings":"c_profile.carbs_hr_medium" },
+    { "html":"pe_hr_low",       "type":"int" ,        "settings":"c_profile.carbs_hr_low" },
+    { "html":"pe_delay_high",   "type":"int" ,        "settings":"c_profile.delay_high" },
+    { "html":"pe_delay_medium", "type":"int" ,        "settings":"c_profile.delay_medium" },
+    { "html":"pe_delay_low",    "type":"int" ,        "settings":"c_profile.delay_low" },
+    //Timezone
+    { "html":"pe_timezone",     "type":"dropdownval" ,"settings":"c_profile.timezone" }
   ];
   
   var icon_add = "data:image/png;base64,iVBORw0KGgoAAAANSUhEUgAAABAAAAAQCAYAAAAf8/9hAAABa0lEQVQ4T6WTzysEYRjHP+/Mrv2hHOTuqJRNOfgPSORHokg4OClHcnVzVygHF6WIcuHMnyCHVRyI3ZYxa23vzOzs7LzamaI0e5i89fTWt/f5vPV5n1cQsXLbHepvfLv5JaLORoZNwMbyFo5vYfsWB0c7xAasLa5T/vCg45Oj48P4gJWFVYxCA63L5PzkND5gfm4Jo+Chd5W5OrtsDYgS1pQ1OTuNUfTQO8tcX9xE+QugYnS/X81MzGP7MpTWkEFVZY1KxcVPV3h27zAtA+oCagIcDfWUCgEje31qfHwK06gHjaF5iXQcHCV5lHmqqgQCNEAI0IsavCVDwNBurxoeGwmaAkDDwvYsqtIh//6AJUoklP97s62BbJYeAqIcpJNZsoM+r2aVbKKOekiBL8An3BuAEiGg1SSKAYnttpFxPdR9Jv4zipxFTUuQKqsfYbFGWfTYuO06yRfxIyweoLuG+iMsFuBfvzFy7FqE33vs2BFqlfN5AAAAAElFTkSuQmCC";
@@ -115,7 +104,7 @@ TODO:
         // create new profile to be edited from last record
         if (records[0] && records[0].dia) {
           // Use only values(keys) defined in defaultprofile, drop the rest. Preparation for future changes.
-          c_profile = defaultprofile;
+          c_profile = _.cloneDeep(defaultprofile);
           for (var key in records[0]) {
             if (typeof c_profile[key] != 'undefined') 
               c_profile[key] = records[0][key];
@@ -123,16 +112,27 @@ TODO:
             if (key == '_id') 
               c_profile[key] = records[0][key];
           }
+          // convert simple values to ranges if needed
+          if (typeof c_profile.carbratio !== 'object') c_profile.carbratio = { 'time': '0:00', 'value': c_profile.carbratio };
+          if (typeof c_profile.sens !== 'object') c_profile.sens = { 'time': '0:00', 'value': c_profile.sens };
+          if (typeof c_profile.target_low !== 'object') c_profile.target_low = { 'time': '0:00', 'value': c_profile.target_low };
+          if (typeof c_profile.target_high !== 'object') c_profile.target_high = { 'time': '0:00', 'value': c_profile.high };
+          if (c_profile.target_high.length != c_profile.target_low.length) {
+            alert('Time ranges of target_low and target_high don\'t  match. Values are restored to defaults.');
+            c_profile.target_low = _.cloneDeep(defaultprofile.target_low);
+            c_profile.target_high = _.cloneDeep(defaultprofile.target_high);
+          }
+          
           $('#pe_status').hide().text('Values loaded.').fadeIn("slow");
           mongoprofiles.unshift(c_profile);
         } else {
-          c_profile = defaultprofile;
+          c_profile = _.cloneDeep(defaultprofile);
           mongoprofiles.unshift(c_profile);
           $('#pe_status').hide().text('Default values used.').fadeIn("slow");
         }
       },
       error: function () {
-        c_profile = defaultprofile;
+        c_profile = _.cloneDeep(defaultprofile);
         mongoprofiles.unshift(c_profile);
         $('#pe_status').hide().text('Error. Default values used.').fadeIn("slow");
       }
@@ -205,12 +205,12 @@ TODO:
   
   // Handling html events and setting/getting values
   function switchStyle(event) {
-    if ($('#pe_input_simple').prop('checked')) {
+    if (!$('#pe_perGIvalues').prop('checked')) {
       $('#pe_simple').show("slow");
-      $('#pe_calculator').hide("slow");
+      $('#pe_advanced').hide("slow");
     } else {
       $('#pe_simple').hide("slow");
-      $('#pe_calculator').show("slow");
+      $('#pe_advanced').show("slow");
     }
     if (event) {
       event.preventDefault();
@@ -222,15 +222,13 @@ TODO:
       "0:00","0:30","1:00","1:30","2:00","2:30","3:00","3:30","4:00","4:30","5:00","5:30",
       "6:00","6:30","7:00","7:30","8:00","8:30","9:00","9:30","10:00","10:30","11:00","11:30",
       "12:00","12:30","13:00","13:30","14:00","14:30","15:00","15:30","16:00","16:30","17:00","17:30",
-      "18:00","18:30","19:00","19:30","20:00","20:30","21:00","21:30","22:00","22:30","23:00","23:30",
-      "24:00"
+      "18:00","18:30","19:00","19:30","20:00","20:30","21:00","21:30","22:00","22:30","23:00","23:30"
     ];
     var mgtime = [
       "12:00AM","0:30AM","1:00AM","1:30AM","2:00AM","2:30AM","3:00AM","3:30AM","4:00AM","4:30AM","5:00AM","5:30AM",
       "6:00AM","6:30AM","7:00AM","7:30AM","8:00AM","8:30AM","9:00AM","9:30AM","10:00AM","10:30AM","11:00AM","11:30AM",
       "12:00PM","0:30PM","1:00PM","1:30PM","2:00PM","2:30PM","3:00PM","3:30PM","4:00PM","4:30PM","5:00PM","5:30PM",
-      "6:00PM","6:30PM","7:00PM","7:30PM","8:00PM","8:30PM","9:00PM","9:30PM","10:00PM","10:30PM","11:00PM","11:30PM",
-      "EndOfDay"
+      "6:00PM","6:30PM","7:00PM","7:30PM","8:00PM","8:30PM","9:00PM","9:30PM","10:00PM","10:30PM","11:00PM","11:30PM"
     ];
     if (event) saveSettings();
     
@@ -239,14 +237,12 @@ TODO:
      {prefix:'pe_ic', array:'carbratio', label:'IC: '},
      {prefix:'pe_isf', array:'sens', label:'ISF: '}
     ].forEach(function (e) {
-      // add end record if not at the end
-      if (toMinutesFromMidnight(c_profile[e.array][c_profile[e.array].length-1].time)!=48*30) c_profile[e.array].push({"time":"24:00","value":0});
       var html = '<table>';
       for (var i=0; i<c_profile[e.array].length; i++) {
         html += '<tr>';
         html += '<td>From: <select class="pe_selectabletime" id="'+e.prefix+'_from_'+i+'">';
         var lowesttime=-1;
-        for (var t=0;t<49;t++) {
+        for (var t=0;t<48;t++) {
           if (i==0 && t>0) continue;
           if (i>0 && isNaN(toMinutesFromMidnight(c_profile[e.array][i-1].time))) continue;
           if (i>0 && toMinutesFromMidnight(c_profile[e.array][i-1].time) >= t*30) continue;
@@ -261,38 +257,47 @@ TODO:
           }
         }
         html += '</select>';
-        if (toMinutesFromMidnight(c_profile[e.array][i].time)<48*30) {
-          html += '<td>'+e.label+'<input type="text" id="'+e.prefix+'_val_'+i+'" value="'+c_profile[e.array][i].value+'"></td>';
-          html += '<td>';
-          html += '<img style="cursor:pointer" title="Add new interval before" src="'+icon_add+'" href="#" onclick="saveSettings(); c_profile[\''+e.array+'\'].splice('+i+',0,{time:"00:00",val:0}); return fillFrom();">';
-          if (i!=0) {
-            html += '<img style="cursor:pointer" title="Delete interval" src="'+icon_remove+'" href="#" onclick="saveSettings(); c_profile[\''+e.array+'\'].splice('+i+',1); return fillFrom();">';
-          }
-          html += '</td>';
+        html += '<td>'+e.label+'<input type="text" id="'+e.prefix+'_val_'+i+'" value="'+c_profile[e.array][i].value+'"></td>';
+        html += '<td>';
+        html += '<img class="addsingle" style="cursor:pointer" title="Add new interval before" src="'+icon_add+'" array="'+e.array+'" pos="'+i+'" href="#">';
+        if (i!=0) {
+          html += '<img class="delsingle" style="cursor:pointer" title="Delete interval" src="'+icon_remove+'" array="'+e.array+'" pos="'+i+'" href="#">';
         }
+        html += '</td>';
         html += '</tr>';
         
         if (lowesttime>toMinutesFromMidnight(c_profile[e.array][i].time)) c_profile[e.array][i].time = toTimeString(lowesttime);
         updateGuiToVal({html:e.prefix+'_from_'+i, type:'dropdownval', settings:'c_profile["'+e.array+'"]['+i+'].time' });
         updateGuiToVal({html:e.prefix+'_val_'+i, type:'float', settings:'c_profile["'+e.array+'"]['+i+'].value' });
       }
+      html += '<tr><td></td><td></td><td><img class="addsingle" style="cursor:pointer" title="Add new interval before" src="'+icon_add+'" array="'+e.array+'" pos="'+i+'" href="#"></td></tr>';
       html += '</table>';
       $('#'+e.prefix+'_placeholder').html(html);
     });
     
+    $('.addsingle').click(function addsingle_click() {
+      var array = $(this).attr('array');
+      var pos = $(this).attr('pos');
+      saveSettings(); 
+      c_profile[array].splice(pos,0,{time:'00:00',value:0});
+      return fillFrom();
+    });
+    
+    $('.delsingle').click(function addsingle_click() {
+      var array = $(this).attr('array');
+      var pos = $(this).attr('pos');
+      saveSettings(); 
+      c_profile[array].splice(pos,1);
+      return fillFrom();
+    });
     
     // target BG
-    // add end record if not at the end
-    if (toMinutesFromMidnight(c_profile.target_low[c_profile.target_low.length-1].time)!=48*30) {
-      c_profile.target_low.push({"time":"24:00","value":0});
-      c_profile.target_high.push({"time":"24:00","value":0});
-    }
     var html = '<table>';
     for (var i=0; i<c_profile.target_low.length; i++) {
       html += '<tr>';
       html += '<td>From: <select class="pe_selectabletime" id="pe_targetbg_from_'+i+'">';
       var lowesttime=-1;
-      for (var t=0;t<49;t++) {
+      for (var t=0;t<48;t++) {
         if (i==0 && t>0) continue;
         if (i>0 && isNaN(toMinutesFromMidnight(c_profile.target_low[i-1].time))) continue;
         if (i>0 && toMinutesFromMidnight(c_profile.target_low[i-1].time) >= t*30) continue;
@@ -311,23 +316,40 @@ TODO:
         html += '<td>Low : <input type="text" id="pe_targetbg_low_'+i+'" value="'+c_profile.target_low[i].value+'"></td>';
         html += '<td>High : <input type="text" id="pe_targetbg_high_'+i+'" value="'+c_profile.target_high[i].value+'"></td>';
         html += '<td>';
-        html += '<img style="cursor:pointer" title="Add new interval before" src="'+icon_add+'" href="#" onclick="saveSettings(); c_profile.target_low.splice('+i+',0,{time:"00:00",value:0}); c_profile.target_high.splice('+i+',0,{time:"00:00",value:0}); return fillFrom();">';
+        html += '<img class="addtargetbg" style="cursor:pointer" title="Add new interval before" src="'+icon_add+'" pos="'+i+'" href="#">';
         if (i!=0) {
-          html += '<img style="cursor:pointer" title="Delete interval" src="'+icon_remove+'" href="#" onclick="saveSettings(); c_profile.target_low.splice('+i+',1); c_profile.target_high.splice('+i+',1); return fillFrom();">';
+          html += '<img class="deltargetbg" style="cursor:pointer" title="Delete interval" src="'+icon_remove+'" pos="'+i+'" href="#">';
         }
         html += '</td>';
       }
       html += '</tr>';
       
-      if (lowesttime>toMinutesFromMidnight(c_profile.target_low[i].time)) c_profile.targetBG[i].time = timeToString(lowesttime);
+      if (lowesttime>toMinutesFromMidnight(c_profile.target_low[i].time)) c_profile.target_low[i].time = toTimeString(lowesttime);
       updateGuiToVal({html:'pe_targetbg_from_'+i, type:'dropdownval', settings:'c_profile.target_low['+i+'].time' });
       updateGuiToVal({html:'pe_targetbg_low_'+i, type:'float', settings:'c_profile.target_low['+i+'].value' });
       updateGuiToVal({html:'pe_targetbg_high_'+i, type:'float', settings:'c_profile.target_high['+i+'].value' });
     }
+    html += '<tr><td></td><td></td><td></td><td><img class="addtargetbg" style="cursor:pointer" title="Add new interval before" src="'+icon_add+'" pos="'+i+'" href="#"></td></tr>';
     html += '</table>';
     $('#pe_targetbg_placeholder').html(html);
     
-    $(".pe_selectabletime").bind("change",fillFrom);
+    $('.addtargetbg').click(function addtargetbg_click() {
+      var pos = $(this).attr('pos');
+      saveSettings(); 
+      c_profile.target_low.splice(pos,0,{time:'00:00',value:0});
+      c_profile.target_high.splice(pos,0,{time:'00:00',value:0});
+      return fillFrom();
+    });
+
+    $('.deltargetbg').click(function deltargetbg_click() {
+      var pos = $(this).attr('pos');
+      saveSettings(); 
+      c_profile.target_low.splice(pos,1);
+      c_profile.target_high.splice(pos,1);
+      return fillFrom();
+    });
+
+    $(".pe_selectabletime").change(fillFrom);
 
     updateGUI();
     if (event) {

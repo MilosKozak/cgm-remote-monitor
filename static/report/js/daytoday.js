@@ -228,19 +228,20 @@
       contextCircles.exit()
         .remove();
 
-      var to = moment(day).add(1, 'days').add(new Date().getTimezoneOffset(), 'minutes');
-      var from = moment(day).add(new Date().getTimezoneOffset(), 'minutes');
+      var to = moment(day).add(1, 'days') //.add(new Date().getTimezoneOffset(), 'minutes');
+      var from = moment(day); //.add(new Date().getTimezoneOffset(), 'minutes');
       var iobpolyline = '', cobpolyline = '';
       for (var dt=from; dt < to; dt.add(5, 'minutes')) {
         if (options.iob) {
-          var iob = Nightscout.iob.calcTotal(data.treatments,dt.toDate()).display;
+          var iob = Nightscout.plugins('iob').calcTotal(data.treatments,Nightscout.profile,dt.toDate()).iob;
           if (dt!=from) {
             iobpolyline += ', ';
           }
           iobpolyline += (xScale2(dt) + padding.left) + ',' + (yInsulinScale(iob) + padding.top) + ' ';
         }
         if (options.cob) {
-          var cob = Nightscout.cob.calcTotal(data.treatments,dt.toDate(),true).cob;
+          var cob = Nightscout.plugins('cob').cobTotal(data.treatments,Nightscout.profile,dt.toDate()).cob;
+console.log(dt.toDate().toLocaleTimeString(),cob);
           if (dt!=from) {
             cobpolyline += ', ';
           }
@@ -277,7 +278,7 @@
                 .style('font-weight', 'normal')
                 .attr('fill', 'black')
                 .attr('y', foodtexts * 15)
-                .attr('transform', 'translate(' + (xScale2(treatment.created_at.getTime()) + padding.left) + ',' + padding.top + ')')
+                .attr('transform', 'translate(' + (xScale2(treatment.mills) + padding.left) + ',' + padding.top + ')')
                 .html(text);
               foodtexts = (foodtexts+1)%6;
               drawpointer = true;
@@ -289,7 +290,7 @@
               .style('font-weight', 'normal')
               .attr('fill', 'black')
               .attr('y', foodtexts * 15)
-              .attr('transform', 'translate(' + (xScale2(treatment.created_at.getTime()) + padding.left) + ',' + padding.top + ')')
+              .attr('transform', 'translate(' + (xScale2(treatment.mills) + padding.left) + ',' + padding.top + ')')
               .html(treatment.notes);
             foodtexts = (foodtexts+1)%6;
             drawpointer = true;
@@ -297,9 +298,9 @@
           if (drawpointer) {
             context.append('line')
               .attr('class', 'high-line')
-              .attr('x1', xScale2(treatment.created_at.getTime()) + padding.left)
+              .attr('x1', xScale2(treatment.mills) + padding.left)
               .attr('y1', lastfoodtext * 15 + padding.top)
-              .attr('x2', xScale2(treatment.created_at.getTime()) + padding.left)
+              .attr('x2', xScale2(treatment.mills) + padding.left)
               .attr('y2', padding.top + treatment.carbs ? yCarbsScale(treatment.carbs) : ( treatment.insulin ? yInsulinScale(treatment.insulin) : chartHeight))
               .style('stroke-dasharray', ('1, 7'))
               .attr('stroke', 'grey');
@@ -307,7 +308,7 @@
         }
 
         if (treatment.carbs && options.carbs) {
-          var ic = Nightscout.profile.getCarbRatio(treatment.created_at);
+          var ic = Nightscout.profile.getCarbRatio(new Date(treatment.mills));
           context.append('rect')
             .attr('y',yCarbsScale(treatment.carbs))
             .attr('height', chartHeight-yCarbsScale(treatment.carbs))
@@ -315,13 +316,13 @@
             .attr('stroke', 'red')
             .attr('opacity', '0.5')
             .attr('fill', 'red')
-            .attr('transform', 'translate(' + (xScale2(treatment.created_at.getTime()) + padding.left) + ',' + +padding.top + ')');
+            .attr('transform', 'translate(' + (xScale2(treatment.mills) + padding.left) + ',' + +padding.top + ')');
           context.append('text')
             .style('font-size', '12px')
             .style('font-weight', 'bold')
             .attr('fill', 'red')
             .attr('y', yCarbsScale(treatment.carbs)-10)
-            .attr('transform', 'translate(' + (xScale2(treatment.created_at.getTime()) + padding.left) + ',' + +padding.top + ')')
+            .attr('transform', 'translate(' + (xScale2(treatment.mills) + padding.left) + ',' + +padding.top + ')')
             .text(treatment.carbs+' g ('+(treatment.carbs/ic).toFixed(2)+'U)');
         }
         
@@ -333,19 +334,19 @@
             .attr('stroke', 'blue')
             .attr('opacity', '0.5')
             .attr('fill', 'blue')
-            .attr('transform', 'translate(' + (xScale2(treatment.created_at.getTime()) + padding.left - 2) + ',' + +padding.top + ')');
+            .attr('transform', 'translate(' + (xScale2(treatment.mills) + padding.left - 2) + ',' + +padding.top + ')');
           context.append('text')
             .style('font-size', '12px')
             .style('font-weight', 'bold')
             .attr('fill', 'blue')
             .attr('y', yInsulinScale(treatment.insulin)-10)
-            .attr('transform', 'translate(' + (xScale2(treatment.created_at.getTime()) + padding.left - 2) + ',' + +padding.top + ')')
+            .attr('transform', 'translate(' + (xScale2(treatment.mills) + padding.left - 2) + ',' + +padding.top + ')')
             .text(treatment.insulin+'U');
         }
         // other treatments
         if (!treatment.insulin && !treatment.carbs) {
           context.append('circle')
-            .attr('cx', xScale2(treatment.created_at.getTime()) + padding.left)
+            .attr('cx', xScale2(treatment.mills) + padding.left)
             .attr('cy', yScale2(scaledTreatmentBG(treatment,data.sgv)) + padding.top)
             .attr('fill', 'purple')
             .style('opacity', 1)
@@ -357,7 +358,7 @@
             .style('font-weight', 'bold')
             .attr('fill', 'purple')
             .attr('y', yScale2(scaledTreatmentBG(treatment,data.sgv)) + padding.top -10)
-            .attr('x', xScale2(treatment.created_at.getTime()) + padding.left + 10)
+            .attr('x', xScale2(treatment.mills) + padding.left + 10)
             .text(treatment.eventType);
         }
       });
