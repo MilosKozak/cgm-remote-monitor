@@ -12,7 +12,7 @@
   var client = Nightscout.client;
   var report_plugins = Nightscout.report_plugins;
 
-  client.init(Nightscout.plugins, function loaded () {
+  client.init(function loaded () {
 
   // init HTML code
   report_plugins.addHtmlFromPlugins( client );
@@ -24,7 +24,7 @@
   var maxInsulinValue = 0
       ,maxCarbsValue = 0
       ,maxDailyCarbsValue = 0;
-  var maxdays = 3 * 31;
+  var maxdays = 6 * 31;
   var datastorage = {};
   var daystoshow = {};
   var sorteddaystoshow = [];
@@ -223,6 +223,7 @@
     options.notes = $('#rp_optionsnotes').is(':checked');
     options.food = $('#rp_optionsfood').is(':checked');
     options.insulin = $('#rp_optionsinsulin').is(':checked');
+    options.insulindistribution = $('#rp_optionsdistribution').is(':checked');
     options.carbs = $('#rp_optionscarbs').is(':checked');
     options.scale = ( $('#rp_linear').is(':checked') ? report_plugins.consts.SCALE_LINEAR : report_plugins.consts.SCALE_LOG );
     options.order = ( $('#rp_oldestontop').is(':checked') ? report_plugins.consts.ORDER_OLDESTONTOP : report_plugins.consts.ORDER_NEWESTONTOP );
@@ -483,6 +484,7 @@
       datastorage.combobolusTreatments = datastorage.combobolusTreatments.concat(datastorage[day].combobolusTreatments);
       datastorage.tempbasalTreatments = datastorage.tempbasalTreatments.concat(datastorage[day].tempbasalTreatments);
     });
+    datastorage.tempbasalTreatments = Nightscout.client.ddata.processDurations(datastorage.tempbasalTreatments);
     
      for (var d in daystoshow) {
         if (daystoshow.hasOwnProperty(d)) {
@@ -496,8 +498,20 @@
     report_plugins.eachPlugin(function (plugin) {
       // jquery plot doesn't draw to hidden div
       $('#'+plugin.name+'-placeholder').css('display','');
-      //console.log('Drawing ',plugin.name);
-      plugin.report(datastorage,sorteddaystoshow,options);
+
+      console.log('Drawing ',plugin.name);
+
+      var skipRender = false;
+
+      if (plugin.name == 'daytoday' && ! $('#daytoday').hasClass('selected')) skipRender = true;
+      if (plugin.name == 'treatments' && ! $('#treatments').hasClass('selected')) skipRender = true;
+
+      if (skipRender) {
+        console.log('Skipping ',plugin.name);
+      } else {
+      	plugin.report(datastorage,sorteddaystoshow,options);  
+      }
+
       if (!$('#'+plugin.name).hasClass('selected')) {
         $('#'+plugin.name+'-placeholder').css('display','none');
       }
@@ -708,7 +722,7 @@
 
     var cal = data.cal[data.cal.length-1];
     var temp1 = [ ];
-    var rawbg = Nightscout.plugins('rawbg');
+    var rawbg = client.rawbg;
     if (cal) {
       temp1 = data.sgv.map(function (entry) {
         entry.mgdl = entry.y; // value names changed from enchilada
